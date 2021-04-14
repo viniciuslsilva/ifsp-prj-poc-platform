@@ -24,3 +24,8 @@ hs_err_pid*
 
 **/.idea
 **/.venv
+
+**/mvnw
+**/mvnw.cdm
+
+**/__pycache*

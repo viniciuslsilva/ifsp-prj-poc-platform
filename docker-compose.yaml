@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  platform-container:
+    container_name: platform
+    build: ./platform
+    ports:
+      - "8080:8080"
+    environment:
+      - FAKE_EXTERNAL_SERVICE_HOST=http://fake-external-service
+      - FAKE_EXTERNAL_SERVICE_PORT=5000
+    networks:
+      - backend
+
+  fake-external-service:
+    container_name: fake-external-service
+    build: ./fake-external-service/app
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

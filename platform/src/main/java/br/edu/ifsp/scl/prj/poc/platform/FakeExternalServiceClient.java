@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,17 +16,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
 public class FakeExternalServiceClient {
-    private final String BASE_URL = "http://localhost:5000";
     private final RestTemplate restTemplate;
+    private final FakeExternalServiceProperties properties;
+
+    private static final String V1_PROCESS_PATH = "/v1/process";
+    private static final String V1_UPLOAD_PATH = "/v1/uploads";
 
     @Autowired
-    public FakeExternalServiceClient(RestTemplate restTemplate) {
+    public FakeExternalServiceClient(RestTemplate restTemplate, FakeExternalServiceProperties properties) {
         this.restTemplate = restTemplate;
+        this.properties = properties;
     }
 
     public String postFile(MultipartFile file) throws IOException {
@@ -39,18 +45,18 @@ public class FakeExternalServiceClient {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new FileSystemResource(fileToSend));
 
-        String url = BASE_URL.concat("/v1/process");
+        URI uri = URI.create(properties.getHost() + ":" + properties.getPort() + V1_PROCESS_PATH);
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
-            return restTemplate.postForObject(url, request, String.class);
+            return restTemplate.postForObject(uri, request, String.class);
         } finally {
             fileToSend.delete();
         }
     }
 
     public Resource getFile(String filename) {
-        String url = BASE_URL.concat("/v1/uploads/" + filename);
-        return restTemplate.getForObject(url, ByteArrayResource.class);
+        URI uri = URI.create(properties.getHost() + ":" + properties.getPort() + V1_UPLOAD_PATH + "/" + filename);
+        return restTemplate.getForObject(uri, ByteArrayResource.class);
     }
 }
