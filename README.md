@@ -1,6 +1,6 @@
 # PRJ - PipeGene Poc
 
-A simple poc to valid an idea of a project for college discipline.  
+A simple poc to validate an idea of a project for college discipline.  
 This project has two services:
 
 - fake-external-service
